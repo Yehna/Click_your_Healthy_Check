@@ -1,0 +1,43 @@
+# This workflow will install Python dependencies, run tests and lint with a single version of Python
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+
+name: Auto-checkin
+
+on:
+  schedule:
+    # 此处为UTC时间1点和23点，对应北京时间+8为9点和7点
+    - cron: 0 1,17 * * *
+  watch:
+    types: started
+
+env:
+  TZ: Asia/Shanghai
+
+jobs:
+  checkin:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+      # 下面2行用于自动获取最新的打卡代码，若不需要可以用#号作开头以注释掉
+      with:
+        repository: Yehna/JNU-Health-Checkin
+
+    - name: Set up Python 3.7
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.7
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install requests pycryptodome
+
+    - name: 打卡
+      run: |
+        python checkin.py
+      env:
+        USERNAME: ${{ secrets.SID }}
+        PASSWORD: ${{ secrets.Pwd }}
+        SCKEY: ${{ secrets.SCKEY }}
